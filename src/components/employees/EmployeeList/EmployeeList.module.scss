@@ -1,0 +1,68 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2933;
+}
+
+.newEmployeeButton :global(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f9fbfd;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filterControl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #4a5568;
+}
+
+.statusDropdownButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusDropdownButton :global(.ant-btn-icon) {
+  margin-inline-end: 0;
+  font-size: 12px;
+}
+
+.table :global(.ant-table) {
+  background-color: #fff;
+}
