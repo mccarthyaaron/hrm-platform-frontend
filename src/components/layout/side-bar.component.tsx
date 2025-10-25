@@ -19,6 +19,10 @@ const menuItems: MenuProps['items'] = [
         key: 'employees-list',
         label: <Link to="/employees/list">Employee List</Link>,
       },
+      {
+        key: 'employees-register',
+        label: <Link to="/employees/register">Register Employee</Link>,
+      },
     ],
   },
 ];
@@ -35,6 +39,10 @@ export function EmployeeSidebar() {
 
     if (pathname.startsWith('/employees/list')) {
       return ['employees-list'];
+    }
+
+    if (pathname.startsWith('/employees/register')) {
+      return ['employees-register'];
     }
 
     if (pathname.startsWith('/employees')) {
