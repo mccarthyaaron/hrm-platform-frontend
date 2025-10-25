@@ -2,30 +2,35 @@ import { useMemo, useState } from 'react';
 import { Button, Dropdown, Input, Select, Space, Table, type MenuProps, type TableColumnsType } from 'antd';
 import { Link } from '@tanstack/react-router';
 import { DownOutlined } from '@ant-design/icons';
-
+import { capitalize } from 'lodash-es';
+import {
+  CAMPUS,
+  EMPLOYMENT_STATUS,
+  employmentStatusOptions,
+  SECTION,
+  type Campus,
+  type EmploymentStatus,
+  type Section,
+} from './data-schema';
 import styles from './EmployeeList.module.scss';
-
-type EmployeeStatus = 'active' | 'inactive' | 'other';
-type EmployeeCampus = 'Platinum' | 'Horizon' | 'Daisy';
-type EmployeeSection = 'Nursery' | 'Primary';
 
 type Employee = {
   id: string;
   surname: string;
   givenNames: string;
-  campus: EmployeeCampus;
-  section: EmployeeSection;
+  campus: Campus;
+  section: Section;
   phone: string;
-  status: EmployeeStatus;
+  status: EmploymentStatus;
 };
 
 const employees: Employee[] = [
   {
     id: '1',
-    surname: 'Okello',
-    givenNames: 'Grace',
-    campus: 'Platinum',
-    section: 'Nursery',
+    surname: 'okello',
+    givenNames: 'grace',
+    campus: 'platinum',
+    section: 'nursery',
     phone: '+256 700 123456',
     status: 'active',
   },
@@ -33,8 +38,8 @@ const employees: Employee[] = [
     id: '2',
     surname: 'Mukasa',
     givenNames: 'John',
-    campus: 'Horizon',
-    section: 'Primary',
+    campus: 'horizon',
+    section: 'primary',
     phone: '+256 701 654321',
     status: 'active',
   },
@@ -42,17 +47,17 @@ const employees: Employee[] = [
     id: '3',
     surname: 'Namutebi',
     givenNames: 'Sarah',
-    campus: 'Daisy',
-    section: 'Nursery',
+    campus: 'daisy',
+    section: 'nursery',
     phone: '+256 702 987654',
-    status: 'inactive',
+    status: 'left',
   },
   {
     id: '4',
     surname: 'Waiswa',
     givenNames: 'Peter',
-    campus: 'Horizon',
-    section: 'Primary',
+    campus: 'horizon',
+    section: 'primary',
     phone: '+256 703 246810',
     status: 'active',
   },
@@ -60,17 +65,17 @@ const employees: Employee[] = [
     id: '5',
     surname: 'Kato',
     givenNames: 'Joseph',
-    campus: 'Platinum',
-    section: 'Primary',
+    campus: 'platinum',
+    section: 'primary',
     phone: '+256 704 135791',
-    status: 'inactive',
+    status: 'left',
   },
   {
     id: '6',
     surname: 'Achan',
     givenNames: 'Ruth',
-    campus: 'Daisy',
-    section: 'Nursery',
+    campus: 'daisy',
+    section: 'nursery',
     phone: '+256 705 192837',
     status: 'active',
   },
@@ -78,14 +83,18 @@ const employees: Employee[] = [
     id: '7',
     surname: 'Nsubuga',
     givenNames: 'Brian',
-    campus: 'Horizon',
-    section: 'Primary',
+    campus: 'horizon',
+    section: 'primary',
     phone: '+256 706 314159',
     status: 'other',
   },
 ];
 
-type TableRecord = Employee & { name: string };
+type TableRecord = Employee & {
+  name: string;
+  campusLabel: string;
+  sectionLabel: string;
+};
 
 const columns: TableColumnsType<TableRecord> = [
   {
@@ -95,12 +104,12 @@ const columns: TableColumnsType<TableRecord> = [
   },
   {
     title: 'Campus',
-    dataIndex: 'campus',
+    dataIndex: 'campusLabel',
     key: 'campus',
   },
   {
     title: 'Section',
-    dataIndex: 'section',
+    dataIndex: 'sectionLabel',
     key: 'section',
   },
   {
@@ -129,35 +138,35 @@ const columns: TableColumnsType<TableRecord> = [
 ];
 
 export function EmployeeList() {
-  const [statusFilter, setStatusFilter] = useState<EmployeeStatus>('active');
-  const [campusFilter, setCampusFilter] = useState<'All' | EmployeeCampus>('All');
-  const [sectionFilter, setSectionFilter] = useState<'All' | EmployeeSection>('All');
+  const [statusFilter, setStatusFilter] = useState<EmploymentStatus>(EMPLOYMENT_STATUS.ACTIVE);
+  const [campusFilter, setCampusFilter] = useState<'All' | Campus>('All');
+  const [sectionFilter, setSectionFilter] = useState<'All' | Section>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const statusLabels: Record<EmployeeStatus, string> = {
+  const handleResetFilters = () => {
+    setStatusFilter(EMPLOYMENT_STATUS.ACTIVE);
+    setCampusFilter('All');
+    setSectionFilter('All');
+    setSearchTerm('');
+  };
+
+  const statusLabels: Record<EmploymentStatus, string> = {
     active: 'Active',
-    inactive: 'Inactive',
+    left: 'Has Left',
     other: 'Other',
   };
-  const statusOptions: EmployeeStatus[] = ['active', 'inactive', 'other'];
+  const statusButtonLabel = statusLabels[statusFilter];
 
-  const statusMenuItems: MenuProps['items'] = statusOptions
+  const statusMenuItems: MenuProps['items'] = employmentStatusOptions
     .filter((status) => status !== statusFilter)
     .map((status) => ({
       key: status,
       label: statusLabels[status],
     }));
-  const selectedStatusKeys: string[] = [];
-  const statusButtonLabel = statusLabels[statusFilter];
 
   const dataSource = useMemo(() => {
     return employees
-      .filter((employee) => {
-        if (statusFilter === 'active') {
-          return employee.status === 'active';
-        }
-        return employee.status === statusFilter;
-      })
+      .filter((employee) => employee.status === statusFilter)
       .filter((employee) => (campusFilter === 'All' ? true : employee.campus === campusFilter))
       .filter((employee) => (sectionFilter === 'All' ? true : employee.section === sectionFilter))
       .filter((employee) => {
@@ -169,7 +178,9 @@ export function EmployeeList() {
       })
       .map((employee) => ({
         ...employee,
-        name: `${employee.surname} ${employee.givenNames}`,
+        name: `${capitalize(employee.surname)} ${capitalize(employee.givenNames)}`,
+        campusLabel: capitalize(employee.campus),
+        sectionLabel: capitalize(employee.section),
       }));
   }, [statusFilter, campusFilter, sectionFilter, searchTerm]);
 
@@ -186,13 +197,12 @@ export function EmployeeList() {
         <div className={styles.filterGroup}>
           <span className={styles.filterLabel}>Employment Status:</span>
           <Space>
-            <Button type={statusFilter === 'active' ? 'primary' : 'default'}>{statusButtonLabel}</Button>
+            <Button type="primary">{statusButtonLabel}</Button>
             <Dropdown
               menu={{
                 items: statusMenuItems,
                 selectable: true,
-                selectedKeys: selectedStatusKeys,
-                onClick: ({ key }) => setStatusFilter(key as EmployeeStatus),
+                onClick: ({ key }) => setStatusFilter(key as EmploymentStatus),
               }}
               trigger={['click']}
             >
@@ -210,29 +220,29 @@ export function EmployeeList() {
         <Space size="large" wrap>
           <div className={styles.filterControl}>
             <span className={styles.filterLabel}>Campus</span>
-            <Select<'All' | EmployeeCampus>
+            <Select<'All' | Campus>
               value={campusFilter}
               style={{ width: 160 }}
               onChange={(value) => setCampusFilter(value)}
               options={[
                 { label: 'All', value: 'All' },
-                { label: 'Platinum', value: 'Platinum' },
-                { label: 'Horizon', value: 'Horizon' },
-                { label: 'Daisy', value: 'Daisy' },
+                { label: 'Platinum', value: CAMPUS.PLATINUM },
+                { label: 'Horizon', value: CAMPUS.HORIZON },
+                { label: 'Daisy', value: CAMPUS.DAISY },
               ]}
             />
           </div>
 
           <div className={styles.filterControl}>
             <span className={styles.filterLabel}>Section</span>
-            <Select<'All' | EmployeeSection>
+            <Select<'All' | Section>
               value={sectionFilter}
               style={{ width: 160 }}
               onChange={(value) => setSectionFilter(value)}
               options={[
                 { label: 'All', value: 'All' },
-                { label: 'Nursery', value: 'Nursery' },
-                { label: 'Primary', value: 'Primary' },
+                { label: 'Nursery', value: SECTION.NURSERY },
+                { label: 'Primary', value: SECTION.PRIMARY },
               ]}
             />
           </div>
@@ -245,7 +255,7 @@ export function EmployeeList() {
               onSearch={(value) => setSearchTerm(value)}
               placeholder="Search by name"
               allowClear
-              style={{ width: 240 }}
+              style={{ width: 360 }}
             />
           </div>
         </Space>
@@ -256,6 +266,14 @@ export function EmployeeList() {
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 10, showSizeChanger: false }}
+        title={() => (
+          <div className={styles.tableHeader}>
+            <span className={styles.tableTitle}>Results</span>
+            <Button size="small" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
+          </div>
+        )}
         className={styles.table}
       />
     </div>

@@ -1,15 +1,59 @@
 import { z } from 'zod';
 
-export const GenderSchema = z.enum(['male', 'female']);
-export const MaritalStatusSchema = z.enum(['single', 'married', 'cohabiting', 'widowed']);
-export const CampusSchema = z.enum(['platinum', 'horizon', 'daisy']);
-export const EmployeeTypeSchema = z.enum(['teaching', 'non-teaching']);
-export const SectionSchema = z.enum(['nursery', 'primary']);
-export const EmploymentStatusSchema = z.enum(['active', 'left', 'other']);
+export const genderOptions = ['male', 'female'] as const;
+export const maritalStatusOptions = ['single', 'married', 'cohabiting', 'widowed'] as const;
+export const campusOptions = ['platinum', 'horizon', 'daisy'] as const;
+export const employeeTypeOptions = ['teaching', 'non-teaching'] as const;
+export const sectionOptions = ['nursery', 'primary'] as const;
+export const employmentStatusOptions = ['active', 'left', 'other'] as const;
 
-export type Gender = z.infer<typeof GenderSchema>;
-export type MaritalStatus = z.infer<typeof MaritalStatusSchema>;
-export type Campus = z.infer<typeof CampusSchema>;
-export type EmployeeType = z.infer<typeof EmployeeTypeSchema>;
-export type Section = z.infer<typeof SectionSchema>;
-export type EmploymentStatus = z.infer<typeof EmploymentStatusSchema>;
+export const GENDER: Record<'MALE' | 'FEMALE', (typeof genderOptions)[number]> = {
+  MALE: 'male',
+  FEMALE: 'female',
+} as const;
+
+export const MARITAL_STATUS: Record<
+  'SINGLE' | 'MARRIED' | 'COHABITING' | 'WIDOWED',
+  (typeof maritalStatusOptions)[number]
+> = {
+  SINGLE: 'single',
+  MARRIED: 'married',
+  COHABITING: 'cohabiting',
+  WIDOWED: 'widowed',
+} as const;
+
+export const CAMPUS: Record<'PLATINUM' | 'HORIZON' | 'DAISY', (typeof campusOptions)[number]> = {
+  PLATINUM: 'platinum',
+  HORIZON: 'horizon',
+  DAISY: 'daisy',
+} as const;
+
+export const EMPLOYEE_TYPE: Record<'TEACHING' | 'NON_TEACHING', (typeof employeeTypeOptions)[number]> = {
+  TEACHING: 'teaching',
+  NON_TEACHING: 'non-teaching',
+} as const;
+
+export const SECTION: Record<'NURSERY' | 'PRIMARY', (typeof sectionOptions)[number]> = {
+  NURSERY: 'nursery',
+  PRIMARY: 'primary',
+} as const;
+
+export const EMPLOYMENT_STATUS: Record<'ACTIVE' | 'LEFT' | 'OTHER', (typeof employmentStatusOptions)[number]> = {
+  ACTIVE: 'active',
+  LEFT: 'left',
+  OTHER: 'other',
+} as const;
+
+// export const GenderSchema = z.enum(genderOptions);
+// export const MaritalStatusSchema = z.enum(maritalStatusOptions);
+// export const CampusSchema = z.enum(campusOptions);
+// export const EmployeeTypeSchema = z.enum(employeeTypeOptions);
+// export const SectionSchema = z.enum(sectionOptions);
+// export const EmploymentStatusSchema = z.enum(employmentStatusOptions);
+
+export type Gender = (typeof GENDER)[keyof typeof GENDER];
+export type MaritalStatus = (typeof MARITAL_STATUS)[keyof typeof MARITAL_STATUS];
+export type Campus = (typeof CAMPUS)[keyof typeof CAMPUS];
+export type EmployeeType = (typeof EMPLOYEE_TYPE)[keyof typeof EMPLOYEE_TYPE];
+export type Section = (typeof SECTION)[keyof typeof SECTION];
+export type EmploymentStatus = (typeof EMPLOYMENT_STATUS)[keyof typeof EMPLOYMENT_STATUS];
