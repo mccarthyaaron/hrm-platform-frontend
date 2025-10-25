@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 export const genderOptions = ['male', 'female'] as const;
 export const maritalStatusOptions = ['single', 'married', 'cohabiting', 'widowed'] as const;
 export const campusOptions = ['platinum', 'horizon', 'daisy'] as const;
@@ -44,16 +42,31 @@ export const EMPLOYMENT_STATUS: Record<'ACTIVE' | 'LEFT' | 'OTHER', (typeof empl
   OTHER: 'other',
 } as const;
 
-// export const GenderSchema = z.enum(genderOptions);
-// export const MaritalStatusSchema = z.enum(maritalStatusOptions);
-// export const CampusSchema = z.enum(campusOptions);
-// export const EmployeeTypeSchema = z.enum(employeeTypeOptions);
-// export const SectionSchema = z.enum(sectionOptions);
-// export const EmploymentStatusSchema = z.enum(employmentStatusOptions);
-
 export type Gender = (typeof GENDER)[keyof typeof GENDER];
 export type MaritalStatus = (typeof MARITAL_STATUS)[keyof typeof MARITAL_STATUS];
 export type Campus = (typeof CAMPUS)[keyof typeof CAMPUS];
 export type EmployeeType = (typeof EMPLOYEE_TYPE)[keyof typeof EMPLOYEE_TYPE];
 export type Section = (typeof SECTION)[keyof typeof SECTION];
 export type EmploymentStatus = (typeof EMPLOYMENT_STATUS)[keyof typeof EMPLOYMENT_STATUS];
+
+export type Employee = {
+  id: string;
+  surname: string;
+  given_name: string;
+  date_of_birth: string;
+  gender: Gender;
+  nationality: string;
+  nin?: string | null;
+  telephone_number1: string;
+  telephone_number2?: string | null;
+  email_address?: string | null;
+  place_of_residence: string;
+  marital_status: MaritalStatus;
+  tin?: string | null;
+  nssf_number?: string | null;
+  campus: Campus;
+  employee_type: EmployeeType;
+  section?: Section | null;
+  job_title: string;
+  employment_status: EmploymentStatus;
+};

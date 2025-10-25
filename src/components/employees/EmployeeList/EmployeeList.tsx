@@ -9,89 +9,165 @@ import {
   employmentStatusOptions,
   SECTION,
   type Campus,
+  type Employee,
   type EmploymentStatus,
   type Section,
 } from './data-schema';
 import styles from './EmployeeList.module.scss';
 
-type Employee = {
-  id: string;
-  surname: string;
-  givenNames: string;
-  campus: Campus;
-  section: Section;
-  phone: string;
-  status: EmploymentStatus;
-};
-
 const employees: Employee[] = [
   {
     id: '1',
-    surname: 'okello',
-    givenNames: 'grace',
+    surname: 'Okello',
+    given_name: 'Grace',
+    date_of_birth: '1990-03-12',
+    gender: 'female',
+    nationality: 'Ugandan',
+    nin: null,
+    telephone_number1: '+256700123456',
+    telephone_number2: null,
+    email_address: 'grace.okello@example.com',
+    place_of_residence: 'Kampala',
+    marital_status: 'single',
+    tin: null,
+    nssf_number: null,
     campus: 'platinum',
+    employee_type: 'teaching',
     section: 'nursery',
-    phone: '+256 700 123456',
-    status: 'active',
+    job_title: 'Nursery Teacher',
+    employment_status: 'active',
   },
   {
     id: '2',
     surname: 'Mukasa',
-    givenNames: 'John',
+    given_name: 'John',
+    date_of_birth: '1987-07-04',
+    gender: 'male',
+    nationality: 'Ugandan',
+    nin: 'CM1234567Z9',
+    telephone_number1: '+256701654321',
+    telephone_number2: null,
+    email_address: 'john.mukasa@example.com',
+    place_of_residence: 'Mukono',
+    marital_status: 'married',
+    tin: 'TIN123456',
+    nssf_number: 'NSSF998877',
     campus: 'horizon',
+    employee_type: 'teaching',
     section: 'primary',
-    phone: '+256 701 654321',
-    status: 'active',
+    job_title: 'Science Teacher',
+    employment_status: 'active',
   },
   {
     id: '3',
     surname: 'Namutebi',
-    givenNames: 'Sarah',
+    given_name: 'Sarah',
+    date_of_birth: '1992-01-20',
+    gender: 'female',
+    nationality: 'Ugandan',
+    nin: null,
+    telephone_number1: '+256702987654',
+    telephone_number2: '+256780987654',
+    email_address: 'sarah.namutebi@example.com',
+    place_of_residence: 'Entebbe',
+    marital_status: 'cohabiting',
+    tin: null,
+    nssf_number: null,
     campus: 'daisy',
+    employee_type: 'teaching',
     section: 'nursery',
-    phone: '+256 702 987654',
-    status: 'left',
+    job_title: 'Assistant Teacher',
+    employment_status: 'left',
   },
   {
     id: '4',
     surname: 'Waiswa',
-    givenNames: 'Peter',
+    given_name: 'Peter',
+    date_of_birth: '1985-11-11',
+    gender: 'male',
+    nationality: 'Ugandan',
+    nin: 'CF7654321X0',
+    telephone_number1: '+256703246810',
+    telephone_number2: null,
+    email_address: 'peter.waiswa@example.com',
+    place_of_residence: 'Jinja',
+    marital_status: 'married',
+    tin: 'TIN654321',
+    nssf_number: 'NSSF776655',
     campus: 'horizon',
+    employee_type: 'non-teaching',
     section: 'primary',
-    phone: '+256 703 246810',
-    status: 'active',
+    job_title: 'ICT Support Specialist',
+    employment_status: 'active',
   },
   {
     id: '5',
     surname: 'Kato',
-    givenNames: 'Joseph',
+    given_name: 'Joseph',
+    date_of_birth: '1993-09-18',
+    gender: 'male',
+    nationality: 'Ugandan',
+    nin: null,
+    telephone_number1: '+256704135791',
+    telephone_number2: null,
+    email_address: 'joseph.kato@example.com',
+    place_of_residence: 'Kawempe',
+    marital_status: 'single',
+    tin: null,
+    nssf_number: null,
     campus: 'platinum',
+    employee_type: 'teaching',
     section: 'primary',
-    phone: '+256 704 135791',
-    status: 'left',
+    job_title: 'Mathematics Teacher',
+    employment_status: 'left',
   },
   {
     id: '6',
     surname: 'Achan',
-    givenNames: 'Ruth',
+    given_name: 'Ruth',
+    date_of_birth: '1995-05-30',
+    gender: 'female',
+    nationality: 'Ugandan',
+    nin: 'CF0987654Y3',
+    telephone_number1: '+256705192837',
+    telephone_number2: '+256781234567',
+    email_address: 'ruth.achan@example.com',
+    place_of_residence: 'Gulu',
+    marital_status: 'widowed',
+    tin: null,
+    nssf_number: 'NSSF223344',
     campus: 'daisy',
+    employee_type: 'teaching',
     section: 'nursery',
-    phone: '+256 705 192837',
-    status: 'active',
+    job_title: 'Head Teacher',
+    employment_status: 'active',
   },
   {
     id: '7',
     surname: 'Nsubuga',
-    givenNames: 'Brian',
+    given_name: 'Brian',
+    date_of_birth: '1988-12-02',
+    gender: 'male',
+    nationality: 'Ugandan',
+    nin: null,
+    telephone_number1: '+256706314159',
+    telephone_number2: null,
+    email_address: 'brian.nsubuga@example.com',
+    place_of_residence: 'Masaka',
+    marital_status: 'cohabiting',
+    tin: 'TIN334455',
+    nssf_number: 'NSSF445566',
     campus: 'horizon',
+    employee_type: 'non-teaching',
     section: 'primary',
-    phone: '+256 706 314159',
-    status: 'other',
+    job_title: 'Sports Coordinator',
+    employment_status: 'other',
   },
 ];
 
 type TableRecord = Employee & {
   name: string;
+  phone: string;
   campusLabel: string;
   sectionLabel: string;
 };
@@ -166,22 +242,26 @@ export function EmployeeList() {
 
   const dataSource = useMemo(() => {
     return employees
-      .filter((employee) => employee.status === statusFilter)
+      .filter((employee) => employee.employment_status === statusFilter)
       .filter((employee) => (campusFilter === 'All' ? true : employee.campus === campusFilter))
       .filter((employee) => (sectionFilter === 'All' ? true : employee.section === sectionFilter))
       .filter((employee) => {
         if (!searchTerm.trim()) {
           return true;
         }
-        const name = `${employee.surname} ${employee.givenNames}`.toLowerCase();
+        const name = `${employee.surname} ${employee.given_name}`.toLowerCase();
         return name.includes(searchTerm.toLowerCase());
       })
-      .map((employee) => ({
-        ...employee,
-        name: `${capitalize(employee.surname)} ${capitalize(employee.givenNames)}`,
-        campusLabel: capitalize(employee.campus),
-        sectionLabel: capitalize(employee.section),
-      }));
+      .map((employee) => {
+        const phone = employee.telephone_number1 ?? '';
+        return {
+          ...employee,
+          name: `${capitalize(employee.surname)} ${capitalize(employee.given_name)}`,
+          phone: phone || employee.telephone_number2 || 'N/A',
+          campusLabel: capitalize(employee.campus),
+          sectionLabel: employee.section ? capitalize(employee.section) : 'N/A',
+        };
+      });
   }, [statusFilter, campusFilter, sectionFilter, searchTerm]);
 
   return (
