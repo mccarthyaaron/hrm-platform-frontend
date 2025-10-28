@@ -23,7 +23,6 @@ function RootComponent() {
           </Content>
         </Layout>
       </Layout>
-      <Outlet />
     </>
   );
 }

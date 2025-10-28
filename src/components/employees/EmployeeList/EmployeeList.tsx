@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Button, Dropdown, Input, Select, Space, Table, type MenuProps, type TableColumnsType } from 'antd';
+import { Alert, Button, Dropdown, Input, Select, Space, Table, type MenuProps, type TableColumnsType } from 'antd';
 import { Link } from '@tanstack/react-router';
 import { DownOutlined } from '@ant-design/icons';
 import { capitalize } from 'lodash-es';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+
 import {
   CAMPUS,
   EMPLOYMENT_STATUS,
-  employmentStatusOptions,
   SECTION,
+  employmentStatusOptions,
   type Campus,
   type Employee,
   type EmploymentStatus,
@@ -15,155 +17,11 @@ import {
 } from './data-schema';
 import styles from './EmployeeList.module.scss';
 
-const employees: Employee[] = [
-  {
-    id: '1',
-    surname: 'Okello',
-    given_name: 'Grace',
-    date_of_birth: '1990-03-12',
-    gender: 'female',
-    nationality: 'Ugandan',
-    nin: null,
-    telephone_number1: '+256700123456',
-    telephone_number2: null,
-    email_address: 'grace.okello@example.com',
-    place_of_residence: 'Kampala',
-    marital_status: 'single',
-    tin: null,
-    nssf_number: null,
-    campus: 'platinum',
-    employee_type: 'teaching',
-    section: 'nursery',
-    job_title: 'Nursery Teacher',
-    employment_status: 'active',
-  },
-  {
-    id: '2',
-    surname: 'Mukasa',
-    given_name: 'John',
-    date_of_birth: '1987-07-04',
-    gender: 'male',
-    nationality: 'Ugandan',
-    nin: 'CM1234567Z9',
-    telephone_number1: '+256701654321',
-    telephone_number2: null,
-    email_address: 'john.mukasa@example.com',
-    place_of_residence: 'Mukono',
-    marital_status: 'married',
-    tin: 'TIN123456',
-    nssf_number: 'NSSF998877',
-    campus: 'horizon',
-    employee_type: 'teaching',
-    section: 'primary',
-    job_title: 'Science Teacher',
-    employment_status: 'active',
-  },
-  {
-    id: '3',
-    surname: 'Namutebi',
-    given_name: 'Sarah',
-    date_of_birth: '1992-01-20',
-    gender: 'female',
-    nationality: 'Ugandan',
-    nin: null,
-    telephone_number1: '+256702987654',
-    telephone_number2: '+256780987654',
-    email_address: 'sarah.namutebi@example.com',
-    place_of_residence: 'Entebbe',
-    marital_status: 'cohabiting',
-    tin: null,
-    nssf_number: null,
-    campus: 'daisy',
-    employee_type: 'teaching',
-    section: 'nursery',
-    job_title: 'Assistant Teacher',
-    employment_status: 'left',
-  },
-  {
-    id: '4',
-    surname: 'Waiswa',
-    given_name: 'Peter',
-    date_of_birth: '1985-11-11',
-    gender: 'male',
-    nationality: 'Ugandan',
-    nin: 'CF7654321X0',
-    telephone_number1: '+256703246810',
-    telephone_number2: null,
-    email_address: 'peter.waiswa@example.com',
-    place_of_residence: 'Jinja',
-    marital_status: 'married',
-    tin: 'TIN654321',
-    nssf_number: 'NSSF776655',
-    campus: 'horizon',
-    employee_type: 'non-teaching',
-    section: 'primary',
-    job_title: 'ICT Support Specialist',
-    employment_status: 'active',
-  },
-  {
-    id: '5',
-    surname: 'Kato',
-    given_name: 'Joseph',
-    date_of_birth: '1993-09-18',
-    gender: 'male',
-    nationality: 'Ugandan',
-    nin: null,
-    telephone_number1: '+256704135791',
-    telephone_number2: null,
-    email_address: 'joseph.kato@example.com',
-    place_of_residence: 'Kawempe',
-    marital_status: 'single',
-    tin: null,
-    nssf_number: null,
-    campus: 'platinum',
-    employee_type: 'teaching',
-    section: 'primary',
-    job_title: 'Mathematics Teacher',
-    employment_status: 'left',
-  },
-  {
-    id: '6',
-    surname: 'Achan',
-    given_name: 'Ruth',
-    date_of_birth: '1995-05-30',
-    gender: 'female',
-    nationality: 'Ugandan',
-    nin: 'CF0987654Y3',
-    telephone_number1: '+256705192837',
-    telephone_number2: '+256781234567',
-    email_address: 'ruth.achan@example.com',
-    place_of_residence: 'Gulu',
-    marital_status: 'widowed',
-    tin: null,
-    nssf_number: 'NSSF223344',
-    campus: 'daisy',
-    employee_type: 'teaching',
-    section: 'nursery',
-    job_title: 'Head Teacher',
-    employment_status: 'active',
-  },
-  {
-    id: '7',
-    surname: 'Nsubuga',
-    given_name: 'Brian',
-    date_of_birth: '1988-12-02',
-    gender: 'male',
-    nationality: 'Ugandan',
-    nin: null,
-    telephone_number1: '+256706314159',
-    telephone_number2: null,
-    email_address: 'brian.nsubuga@example.com',
-    place_of_residence: 'Masaka',
-    marital_status: 'cohabiting',
-    tin: 'TIN334455',
-    nssf_number: 'NSSF445566',
-    campus: 'horizon',
-    employee_type: 'non-teaching',
-    section: 'primary',
-    job_title: 'Sports Coordinator',
-    employment_status: 'other',
-  },
-];
+type EmployeeQueryFilters = {
+  employment_status: EmploymentStatus;
+  campus: 'All' | Campus;
+  section: 'All' | Section;
+};
 
 type TableRecord = Employee & {
   name: string;
@@ -171,6 +29,8 @@ type TableRecord = Employee & {
   campusLabel: string;
   sectionLabel: string;
 };
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const columns: TableColumnsType<TableRecord> = [
   {
@@ -219,6 +79,17 @@ export function EmployeeList() {
   const [sectionFilter, setSectionFilter] = useState<'All' | Section>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const queryFilters = useMemo<EmployeeQueryFilters>(
+    () => ({
+      employment_status: statusFilter,
+      campus: campusFilter,
+      section: sectionFilter,
+    }),
+    [statusFilter, campusFilter, sectionFilter]
+  );
+
+  const { data: employees = [], isLoading, isFetching, isError, error } = useEmployeesQuery(queryFilters);
+
   const handleResetFilters = () => {
     setStatusFilter(EMPLOYMENT_STATUS.ACTIVE);
     setCampusFilter('All');
@@ -240,29 +111,30 @@ export function EmployeeList() {
       label: statusLabels[status],
     }));
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
   const dataSource = useMemo(() => {
     return employees
-      .filter((employee) => employee.employment_status === statusFilter)
-      .filter((employee) => (campusFilter === 'All' ? true : employee.campus === campusFilter))
-      .filter((employee) => (sectionFilter === 'All' ? true : employee.section === sectionFilter))
       .filter((employee) => {
-        if (!searchTerm.trim()) {
+        if (!normalizedSearch) {
           return true;
         }
-        const name = `${employee.surname} ${employee.given_name}`.toLowerCase();
-        return name.includes(searchTerm.toLowerCase());
+        const fullName = `${employee.surname} ${employee.given_name}`.toLowerCase();
+        return fullName.includes(normalizedSearch);
       })
       .map((employee) => {
-        const phone = employee.telephone_number1 ?? '';
+        const phone = employee.telephone_number1 || employee.telephone_number2 || 'N/A';
         return {
           ...employee,
           name: `${capitalize(employee.surname)} ${capitalize(employee.given_name)}`,
-          phone: phone || employee.telephone_number2 || 'N/A',
+          phone,
           campusLabel: capitalize(employee.campus),
           sectionLabel: employee.section ? capitalize(employee.section) : 'N/A',
         };
       });
-  }, [statusFilter, campusFilter, sectionFilter, searchTerm]);
+  }, [employees, normalizedSearch]);
+
+  const errorMessage = error instanceof Error ? error.message : 'Something went wrong while fetching employees.';
 
   return (
     <div className={styles.container}>
@@ -341,11 +213,14 @@ export function EmployeeList() {
         </Space>
       </div>
 
+      {isError ? <Alert showIcon type="error" message={errorMessage} className={styles.errorAlert} /> : null}
+
       <Table<TableRecord>
         rowKey="id"
         columns={columns}
         dataSource={dataSource}
         pagination={{ pageSize: 10, showSizeChanger: false }}
+        size="small"
         title={() => (
           <div className={styles.tableHeader}>
             <span className={styles.tableTitle}>Results</span>
@@ -354,8 +229,48 @@ export function EmployeeList() {
             </Button>
           </div>
         )}
+        loading={isLoading || isFetching}
         className={styles.table}
       />
     </div>
   );
+}
+
+function useEmployeesQuery(filters: EmployeeQueryFilters) {
+  const result = useQuery<Employee[], Error>({
+    queryKey: ['employees', filters.employment_status],
+    queryFn: () => fetchEmployees(filters.employment_status),
+    placeholderData: keepPreviousData,
+  });
+
+  const filteredEmployees = result.data
+    ?.filter((employee) => (filters.campus === 'All' ? true : employee.campus === filters.campus))
+    .filter((employee) => (filters.section === 'All' ? true : employee.section === filters.section));
+
+  return { ...result, data: filteredEmployees };
+}
+
+async function fetchEmployees(employmentStatus: EmployeeQueryFilters['employment_status']): Promise<Employee[]> {
+  if (!API_BASE_URL) {
+    throw new Error('VITE_API_BASE_URL is not configured.');
+  }
+
+  const url = new URL('/employees', API_BASE_URL);
+  const params = new URLSearchParams();
+
+  params.set('employment_status', employmentStatus);
+
+  url.search = params.toString();
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch employees from the server.');
+  }
+
+  return (await response.json()) as Employee[];
 }
