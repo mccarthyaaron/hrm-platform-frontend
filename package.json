@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@tanstack/eslint-plugin-query": "^5.91.2",
     "@tanstack/router-plugin": "^1.133.27",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.6.0",
