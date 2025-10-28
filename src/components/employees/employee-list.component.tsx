@@ -15,9 +15,10 @@ import {
   type EmploymentStatus,
   type Section,
 } from './data-schema';
-import styles from './EmployeeList.module.scss';
+import styles from './employee-list.module.scss';
+import { useEmployees } from './heplers';
 
-type EmployeeQueryFilters = {
+export type EmployeeQueryFilters = {
   employment_status: EmploymentStatus;
   campus: 'All' | Campus;
   section: 'All' | Section;
@@ -88,7 +89,7 @@ export function EmployeeList() {
     [statusFilter, campusFilter, sectionFilter]
   );
 
-  const { data: employees = [], isLoading, isFetching, isError, error } = useEmployeesQuery(queryFilters);
+  const { data: employees, isLoading, isFetching, isError, error } = useEmployees(queryFilters);
 
   const handleResetFilters = () => {
     setStatusFilter(EMPLOYMENT_STATUS.ACTIVE);
@@ -135,6 +136,10 @@ export function EmployeeList() {
   }, [employees, normalizedSearch]);
 
   const errorMessage = error instanceof Error ? error.message : 'Something went wrong while fetching employees.';
+
+  if (isError) {
+    return <Alert showIcon type="error" message={errorMessage} className={styles.errorAlert} />;
+  }
 
   return (
     <div className={styles.container}>
@@ -213,8 +218,6 @@ export function EmployeeList() {
         </Space>
       </div>
 
-      {isError ? <Alert showIcon type="error" message={errorMessage} className={styles.errorAlert} /> : null}
-
       <Table<TableRecord>
         rowKey="id"
         columns={columns}
@@ -234,43 +237,4 @@ export function EmployeeList() {
       />
     </div>
   );
-}
-
-function useEmployeesQuery(filters: EmployeeQueryFilters) {
-  const result = useQuery<Employee[], Error>({
-    queryKey: ['employees', filters.employment_status],
-    queryFn: () => fetchEmployees(filters.employment_status),
-    placeholderData: keepPreviousData,
-  });
-
-  const filteredEmployees = result.data
-    ?.filter((employee) => (filters.campus === 'All' ? true : employee.campus === filters.campus))
-    .filter((employee) => (filters.section === 'All' ? true : employee.section === filters.section));
-
-  return { ...result, data: filteredEmployees };
-}
-
-async function fetchEmployees(employmentStatus: EmployeeQueryFilters['employment_status']): Promise<Employee[]> {
-  if (!API_BASE_URL) {
-    throw new Error('VITE_API_BASE_URL is not configured.');
-  }
-
-  const url = new URL('/employees', API_BASE_URL);
-  const params = new URLSearchParams();
-
-  params.set('employment_status', employmentStatus);
-
-  url.search = params.toString();
-
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch employees from the server.');
-  }
-
-  return (await response.json()) as Employee[];
 }
