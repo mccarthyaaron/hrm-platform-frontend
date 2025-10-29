@@ -5,8 +5,6 @@ import { keepPreviousData } from '@tanstack/react-query';
 import { fetcher } from '../../utilities/fetcher';
 
 export function useEmployees(filters: EmployeeQueryFilters) {
-  // throw new Error('test errror');
-
   const result = useQuery({
     queryKey: ['employees', filters.employment_status],
     queryFn: () =>
@@ -16,10 +14,17 @@ export function useEmployees(filters: EmployeeQueryFilters) {
       }),
     // placeholderData: keepPreviousData,
   });
+  const employees = result.data ?? [];
 
-  const filteredEmployees = result.data
+  let filteredEmployees = employees
     ?.filter((employee) => (filters.campus === 'All' ? true : employee.campus === filters.campus))
-    .filter((employee) => (filters.section === 'All' ? true : employee.section === filters.section));
+    .filter((employee) => (filters.employee_type === 'All' ? true : employee.employee_type === filters.employee_type));
 
-  return { ...result, data: filteredEmployees || [] };
+  if (filters.section !== undefined) {
+    filteredEmployees = filteredEmployees.filter((employee) =>
+      filters.section === 'All' ? true : employee.section === filters.section
+    );
+  }
+
+  return { ...result, data: filteredEmployees };
 }

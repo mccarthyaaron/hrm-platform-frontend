@@ -9,9 +9,11 @@ import {
   CAMPUS,
   EMPLOYMENT_STATUS,
   SECTION,
+  EMPLOYEE_TYPE,
   employmentStatusOptions,
   type Campus,
   type Employee,
+  type EmployeeType,
   type EmploymentStatus,
   type Section,
 } from './data-schema';
@@ -21,7 +23,8 @@ import { useEmployees } from './heplers';
 export type EmployeeQueryFilters = {
   employment_status: EmploymentStatus;
   campus: 'All' | Campus;
-  section: 'All' | Section;
+  employee_type: 'All' | EmployeeType;
+  section?: 'All' | Section;
 };
 
 type TableRecord = Employee & {
@@ -30,8 +33,6 @@ type TableRecord = Employee & {
   campusLabel: string;
   sectionLabel: string;
 };
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const columns: TableColumnsType<TableRecord> = [
   {
@@ -77,6 +78,7 @@ const columns: TableColumnsType<TableRecord> = [
 export function EmployeeList() {
   const [statusFilter, setStatusFilter] = useState<EmploymentStatus>(EMPLOYMENT_STATUS.ACTIVE);
   const [campusFilter, setCampusFilter] = useState<'All' | Campus>('All');
+  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'All' | EmployeeType>('All');
   const [sectionFilter, setSectionFilter] = useState<'All' | Section>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -84,9 +86,10 @@ export function EmployeeList() {
     () => ({
       employment_status: statusFilter,
       campus: campusFilter,
-      section: sectionFilter,
+      employee_type: employeeTypeFilter,
+      section: employeeTypeFilter === 'teaching' ? sectionFilter : undefined,
     }),
-    [statusFilter, campusFilter, sectionFilter]
+    [statusFilter, campusFilter, employeeTypeFilter, sectionFilter]
   );
 
   const { data: employees, isLoading, isFetching, isError, error } = useEmployees(queryFilters);
@@ -94,6 +97,7 @@ export function EmployeeList() {
   const handleResetFilters = () => {
     setStatusFilter(EMPLOYMENT_STATUS.ACTIVE);
     setCampusFilter('All');
+    setEmployeeTypeFilter('All');
     setSectionFilter('All');
     setSearchTerm('');
   };
@@ -191,18 +195,34 @@ export function EmployeeList() {
           </div>
 
           <div className={styles.filterControl}>
-            <span className={styles.filterLabel}>Section</span>
-            <Select<'All' | Section>
-              value={sectionFilter}
+            <span className={styles.filterLabel}>Employee Type</span>
+            <Select<'All' | EmployeeType>
+              value={employeeTypeFilter}
               style={{ width: 160 }}
-              onChange={(value) => setSectionFilter(value)}
+              onChange={(value) => setEmployeeTypeFilter(value)}
               options={[
                 { label: 'All', value: 'All' },
-                { label: 'Nursery', value: SECTION.NURSERY },
-                { label: 'Primary', value: SECTION.PRIMARY },
+                { label: 'Teaching', value: EMPLOYEE_TYPE.TEACHING },
+                { label: 'Non-Teaching', value: EMPLOYEE_TYPE.NON_TEACHING },
               ]}
             />
           </div>
+
+          {employeeTypeFilter === 'teaching' && (
+            <div className={styles.filterControl}>
+              <span className={styles.filterLabel}>Section</span>
+              <Select<'All' | Section>
+                value={sectionFilter}
+                style={{ width: 160 }}
+                onChange={(value) => setSectionFilter(value)}
+                options={[
+                  { label: 'All', value: 'All' },
+                  { label: 'Nursery', value: SECTION.NURSERY },
+                  { label: 'Primary', value: SECTION.PRIMARY },
+                ]}
+              />
+            </div>
+          )}
 
           <div className={styles.filterControl}>
             <span className={styles.filterLabel}>Search</span>
