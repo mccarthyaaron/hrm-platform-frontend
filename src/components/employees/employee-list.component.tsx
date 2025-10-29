@@ -38,9 +38,10 @@ type TableRecord = Employee & {
   phone: string;
   campusLabel: string;
   sectionLabel: string;
+  employeeTypeLabel: string;
 };
 
-const columns: TableColumnsType<TableRecord> = [
+const baseColumnList: TableColumnsType<TableRecord> = [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -52,9 +53,9 @@ const columns: TableColumnsType<TableRecord> = [
     key: 'campus',
   },
   {
-    title: 'Section',
-    dataIndex: 'sectionLabel',
-    key: 'section',
+    title: 'Employee Type',
+    dataIndex: 'employeeTypeLabel',
+    key: 'employeeType',
   },
   {
     title: 'Telephone',
@@ -101,6 +102,20 @@ export function EmployeeList() {
     else return { ...baseFilters, employee_type: employeeTypeFilter, section: sectionFilter };
   }, [statusFilter, campusFilter, employeeTypeFilter, sectionFilter]);
 
+  const columns = useMemo<TableColumnsType<TableRecord>>(() => {
+    if (employeeTypeFilter === EMPLOYEE_TYPE.TEACHING) {
+      const columnToInsert = {
+        title: 'Section',
+        dataIndex: 'sectionLabel',
+        key: 'section',
+      };
+      const indexToInsert = baseColumnList.findIndex((col) => col.key === 'employeeType') + 1;
+      return [...baseColumnList].toSpliced(indexToInsert, 0, columnToInsert);
+    }
+
+    return baseColumnList;
+  }, [employeeTypeFilter, baseColumnList]);
+
   const { data: employees, isLoading, isFetching, isError, error } = useEmployees(queryFilters);
 
   const handleResetFilters = () => {
@@ -144,6 +159,7 @@ export function EmployeeList() {
           phone,
           campusLabel: capitalize(employee.campus),
           sectionLabel: employee.section ? capitalize(employee.section) : 'N/A',
+          employeeTypeLabel: capitalize(employee.employee_type),
         };
       });
   }, [employees, normalizedSearch]);
