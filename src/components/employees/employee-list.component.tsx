@@ -20,12 +20,18 @@ import {
 import styles from './employee-list.module.scss';
 import { useEmployees } from './heplers';
 
-export type EmployeeQueryFilters = {
-  employment_status: EmploymentStatus;
-  campus: 'All' | Campus;
-  employee_type: 'All' | EmployeeType;
-  section?: 'All' | Section;
-};
+export type EmployeeQueryFilters =
+  | {
+      employment_status: EmploymentStatus;
+      campus: 'All' | Campus;
+      employee_type: 'All' | 'non-teaching';
+    }
+  | {
+      employment_status: EmploymentStatus;
+      campus: 'All' | Campus;
+      employee_type: 'teaching';
+      section: 'All' | Section;
+    };
 
 type TableRecord = Employee & {
   name: string;
@@ -82,15 +88,18 @@ export function EmployeeList() {
   const [sectionFilter, setSectionFilter] = useState<'All' | Section>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const queryFilters = useMemo<EmployeeQueryFilters>(
-    () => ({
+  const queryFilters = useMemo<EmployeeQueryFilters>(() => {
+    const baseFilters = {
       employment_status: statusFilter,
       campus: campusFilter,
-      employee_type: employeeTypeFilter,
-      section: employeeTypeFilter === 'teaching' ? sectionFilter : undefined,
-    }),
-    [statusFilter, campusFilter, employeeTypeFilter, sectionFilter]
-  );
+    };
+    if (employeeTypeFilter === 'All' || employeeTypeFilter === 'non-teaching')
+      return {
+        ...baseFilters,
+        employee_type: employeeTypeFilter,
+      };
+    else return { ...baseFilters, employee_type: employeeTypeFilter, section: sectionFilter };
+  }, [statusFilter, campusFilter, employeeTypeFilter, sectionFilter]);
 
   const { data: employees, isLoading, isFetching, isError, error } = useEmployees(queryFilters);
 

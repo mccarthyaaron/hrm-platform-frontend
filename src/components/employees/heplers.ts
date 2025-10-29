@@ -20,7 +20,7 @@ export function useEmployees(filters: EmployeeQueryFilters) {
     ?.filter((employee) => (filters.campus === 'All' ? true : employee.campus === filters.campus))
     .filter((employee) => (filters.employee_type === 'All' ? true : employee.employee_type === filters.employee_type));
 
-  if (filters.section !== undefined) {
+  if (filters.employee_type === 'teaching') {
     filteredEmployees = filteredEmployees.filter((employee) =>
       filters.section === 'All' ? true : employee.section === filters.section
     );
