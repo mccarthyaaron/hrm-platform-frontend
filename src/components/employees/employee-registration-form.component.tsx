@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Form, Input, Select, message } from 'antd';
+import { Alert, Button, Col, Form, Input, Row, Select, Typography, message } from 'antd';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,9 @@ import {
   sectionOptions,
 } from './data-schema';
 import { fetcher, HttpError } from '../../utilities/fetcher';
+import styles from './employee-registration-form.module.scss';
+
+const { Title } = Typography;
 
 const toZodEnum = <T extends readonly string[]>(values: T) =>
   z.enum(values as unknown as [T[number], ...T[number][]]);
@@ -40,11 +43,7 @@ const optionalPhoneSchema = z
   });
 
 const optionalEmailSchema = z
-  .union([
-    z.string().trim().email({ message: 'Invalid email address' }),
-    z.literal(''),
-    z.undefined(),
-  ])
+  .union([z.string().trim().email({ message: 'Invalid email address' }), z.literal(''), z.undefined()])
   .transform((value) => {
     if (typeof value !== 'string') return undefined;
     const trimmed = value.trim();
@@ -132,13 +131,17 @@ const defaultEmploymentStatus = (
   employmentStatusOptions.includes('active') ? 'active' : employmentStatusOptions[0]
 ) as EmployeeRegistrationFormValues['employment_status'];
 
-const defaultGender = (genderOptions.includes('male') ? 'male' : genderOptions[0]) as EmployeeRegistrationFormValues['gender'];
+const defaultGender = (
+  genderOptions.includes('male') ? 'male' : genderOptions[0]
+) as EmployeeRegistrationFormValues['gender'];
 
 const defaultMaritalStatus = (
   maritalStatusOptions.includes('single') ? 'single' : maritalStatusOptions[0]
 ) as EmployeeRegistrationFormValues['marital_status'];
 
-const defaultCampus = (campusOptions.includes('platinum') ? 'platinum' : campusOptions[0]) as EmployeeRegistrationFormValues['campus'];
+const defaultCampus = (
+  campusOptions.includes('platinum') ? 'platinum' : campusOptions[0]
+) as EmployeeRegistrationFormValues['campus'];
 
 const defaultValues: EmployeeRegistrationFormValues = {
   surname: '',
@@ -228,317 +231,376 @@ export function EmployeeRegistrationForm() {
   return (
     <Form layout="vertical" component="form" onSubmitCapture={onSubmit}>
       {messageContextHolder}
-      {formError ? <Alert type="error" showIcon message={formError} style={{ marginBottom: 16 }} /> : null}
+      {formError ? <Alert type="error" showIcon message={formError} className={styles.formAlert} /> : null}
 
-      <Form.Item
-        label="Surname"
-        required
-        validateStatus={errors.surname ? 'error' : undefined}
-        help={errors.surname?.message}
-      >
-        <Controller
-          name="surname"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter surname" />}
-        />
-      </Form.Item>
+      <div className={styles.section}>
+        <Title level={4} className={styles.sectionTitle}>
+          Bio Data
+        </Title>
 
-      <Form.Item
-        label="Given Name"
-        required
-        validateStatus={errors.given_name ? 'error' : undefined}
-        help={errors.given_name?.message}
-      >
-        <Controller
-          name="given_name"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter given name" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Date of Birth"
-        required
-        validateStatus={errors.date_of_birth ? 'error' : undefined}
-        help={errors.date_of_birth?.message}
-      >
-        <Controller
-          name="date_of_birth"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} value={field.value ?? ''} type="date" placeholder="YYYY-MM-DD" />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Gender"
-        required
-        validateStatus={errors.gender ? 'error' : undefined}
-        help={errors.gender?.message}
-      >
-        <Controller
-          name="gender"
-          control={control}
-          render={({ field }) => (
-            <Select
-              ref={field.ref}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              options={genderOptions.map((gender) => ({
-                label: capitalize(gender),
-                value: gender,
-              }))}
-              placeholder="Select gender"
-            />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Nationality"
-        required
-        validateStatus={errors.nationality ? 'error' : undefined}
-        help={errors.nationality?.message}
-      >
-        <Controller
-          name="nationality"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter nationality" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="National ID Number (NIN)"
-        validateStatus={errors.nin ? 'error' : undefined}
-        help={errors.nin?.message}
-      >
-        <Controller
-          name="nin"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter NIN (optional)" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Primary Telephone Number"
-        required
-        validateStatus={errors.telephone_number1 ? 'error' : undefined}
-        help={errors.telephone_number1?.message}
-      >
-        <Controller
-          name="telephone_number1"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} value={field.value ?? ''} placeholder="e.g. 0700123456" maxLength={10} />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Secondary Telephone Number"
-        validateStatus={errors.telephone_number2 ? 'error' : undefined}
-        help={errors.telephone_number2?.message}
-      >
-        <Controller
-          name="telephone_number2"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} value={field.value ?? ''} placeholder="Optional secondary number" maxLength={10} />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Email Address"
-        validateStatus={errors.email_address ? 'error' : undefined}
-        help={errors.email_address?.message}
-      >
-        <Controller
-          name="email_address"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter email address" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Place of Residence"
-        required
-        validateStatus={errors.place_of_residence ? 'error' : undefined}
-        help={errors.place_of_residence?.message}
-      >
-        <Controller
-          name="place_of_residence"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} value={field.value ?? ''} placeholder="Enter place of residence" />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Marital Status"
-        required
-        validateStatus={errors.marital_status ? 'error' : undefined}
-        help={errors.marital_status?.message}
-      >
-        <Controller
-          name="marital_status"
-          control={control}
-          render={({ field }) => (
-            <Select
-              ref={field.ref}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              options={maritalStatusOptions.map((status) => ({
-                label: capitalize(status),
-                value: status,
-              }))}
-              placeholder="Select marital status"
-            />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="TIN"
-        validateStatus={errors.tin ? 'error' : undefined}
-        help={errors.tin?.message}
-      >
-        <Controller
-          name="tin"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter TIN (optional)" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="NSSF Number"
-        validateStatus={errors.nssf_number ? 'error' : undefined}
-        help={errors.nssf_number?.message}
-      >
-        <Controller
-          name="nssf_number"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter NSSF number (optional)" />}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Campus"
-        required
-        validateStatus={errors.campus ? 'error' : undefined}
-        help={errors.campus?.message}
-      >
-        <Controller
-          name="campus"
-          control={control}
-          render={({ field }) => (
-            <Select
-              ref={field.ref}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              options={campusOptions.map((campus) => ({
-                label: capitalize(campus),
-                value: campus,
-              }))}
-              placeholder="Select campus"
-            />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="Employee Type"
-        required
-        validateStatus={errors.employee_type ? 'error' : undefined}
-        help={errors.employee_type?.message}
-      >
-        <Controller
-          name="employee_type"
-          control={control}
-          render={({ field }) => (
-            <Select
-              ref={field.ref}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              options={employeeTypeOptions.map((type) => ({
-                label: capitalize(type),
-                value: type,
-              }))}
-              placeholder="Select employee type"
-            />
-          )}
-        />
-      </Form.Item>
-
-      {employeeType === 'teaching' ? (
-        <Form.Item
-          label="Section"
-          required
-          validateStatus={errors.section ? 'error' : undefined}
-          help={errors.section?.message}
-        >
-          <Controller
-            name="section"
-            control={control}
-            render={({ field }) => (
-              <Select
-                ref={field.ref}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                options={sectionSelectOptions}
-                placeholder="Select section"
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Surname"
+              required
+              validateStatus={errors.surname ? 'error' : undefined}
+              help={errors.surname?.message}
+            >
+              <Controller
+                name="surname"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter surname" />}
               />
-            )}
-          />
-        </Form.Item>
-      ) : null}
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Given Name"
+              required
+              validateStatus={errors.given_name ? 'error' : undefined}
+              help={errors.given_name?.message}
+            >
+              <Controller
+                name="given_name"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter given name" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-      <Form.Item
-        label="Job Title"
-        required
-        validateStatus={errors.job_title ? 'error' : undefined}
-        help={errors.job_title?.message}
-      >
-        <Controller
-          name="job_title"
-          control={control}
-          render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter job title" />}
-        />
-      </Form.Item>
+        <Row gutter={16}>
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Date of Birth"
+              required
+              validateStatus={errors.date_of_birth ? 'error' : undefined}
+              help={errors.date_of_birth?.message}
+            >
+              <Controller
+                name="date_of_birth"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} value={field.value ?? ''} type="date" placeholder="YYYY-MM-DD" />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Gender"
+              required
+              validateStatus={errors.gender ? 'error' : undefined}
+              help={errors.gender?.message}
+            >
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={genderOptions.map((gender) => ({
+                      label: capitalize(gender),
+                      value: gender,
+                    }))}
+                    placeholder="Select gender"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Marital Status"
+              required
+              validateStatus={errors.marital_status ? 'error' : undefined}
+              help={errors.marital_status?.message}
+            >
+              <Controller
+                name="marital_status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={maritalStatusOptions.map((status) => ({
+                      label: capitalize(status),
+                      value: status,
+                    }))}
+                    placeholder="Select marital status"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-      <Form.Item
-        label="Employment Status"
-        required
-        validateStatus={errors.employment_status ? 'error' : undefined}
-        help={errors.employment_status?.message}
-      >
-        <Controller
-          name="employment_status"
-          control={control}
-          render={({ field }) => (
-            <Select
-              ref={field.ref}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              options={employmentStatusOptions.map((status) => ({
-                label: capitalize(status),
-                value: status,
-              }))}
-              placeholder="Select employment status"
-            />
-          )}
-        />
-      </Form.Item>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Nationality"
+              required
+              validateStatus={errors.nationality ? 'error' : undefined}
+              help={errors.nationality?.message}
+            >
+              <Controller
+                name="nationality"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter nationality" />}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="National ID Number (NIN)"
+              validateStatus={errors.nin ? 'error' : undefined}
+              help={errors.nin?.message}
+            >
+              <Controller
+                name="nin"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter NIN (optional)" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </div>
 
-      <Form.Item>
+      <div className={styles.section}>
+        <Title level={4} className={styles.sectionTitle}>
+          Contact Information
+        </Title>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Primary Telephone Number"
+              required
+              validateStatus={errors.telephone_number1 ? 'error' : undefined}
+              help={errors.telephone_number1?.message}
+            >
+              <Controller
+                name="telephone_number1"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} value={field.value ?? ''} placeholder="e.g. 0700123456" maxLength={10} />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Secondary Telephone Number"
+              validateStatus={errors.telephone_number2 ? 'error' : undefined}
+              help={errors.telephone_number2?.message}
+            >
+              <Controller
+                name="telephone_number2"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} value={field.value ?? ''} placeholder="Optional secondary number" maxLength={10} />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Email Address"
+              validateStatus={errors.email_address ? 'error' : undefined}
+              help={errors.email_address?.message}
+            >
+              <Controller
+                name="email_address"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter email address" />}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Place of Residence"
+              required
+              validateStatus={errors.place_of_residence ? 'error' : undefined}
+              help={errors.place_of_residence?.message}
+            >
+              <Controller
+                name="place_of_residence"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter place of residence" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </div>
+
+      <div className={styles.section}>
+        <Title level={4} className={styles.sectionTitle}>
+          Work Information
+        </Title>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item label="TIN" validateStatus={errors.tin ? 'error' : undefined} help={errors.tin?.message}>
+              <Controller
+                name="tin"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter TIN (optional)" />}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="NSSF Number"
+              validateStatus={errors.nssf_number ? 'error' : undefined}
+              help={errors.nssf_number?.message}
+            >
+              <Controller
+                name="nssf_number"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} value={field.value ?? ''} placeholder="Enter NSSF number (optional)" />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Campus"
+              required
+              validateStatus={errors.campus ? 'error' : undefined}
+              help={errors.campus?.message}
+            >
+              <Controller
+                name="campus"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={campusOptions.map((campus) => ({
+                      label: capitalize(campus),
+                      value: campus,
+                    }))}
+                    placeholder="Select campus"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Employee Type"
+              required
+              validateStatus={errors.employee_type ? 'error' : undefined}
+              help={errors.employee_type?.message}
+            >
+              <Controller
+                name="employee_type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={employeeTypeOptions.map((type) => ({
+                      label: capitalize(type),
+                      value: type,
+                    }))}
+                    placeholder="Select employee type"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {employeeType === 'teaching' ? (
+          <Row gutter={16}>
+            <Col xs={24}>
+              <Form.Item
+                label="Section"
+                required
+                validateStatus={errors.section ? 'error' : undefined}
+                help={errors.section?.message}
+              >
+                <Controller
+                  name="section"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      ref={field.ref}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={sectionSelectOptions}
+                      placeholder="Select section"
+                    />
+                  )}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        ) : null}
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Job Title"
+              required
+              validateStatus={errors.job_title ? 'error' : undefined}
+              help={errors.job_title?.message}
+            >
+              <Controller
+                name="job_title"
+                control={control}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} placeholder="Enter job title" />}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Employment Status"
+              required
+              validateStatus={errors.employment_status ? 'error' : undefined}
+              help={errors.employment_status?.message}
+            >
+              <Controller
+                name="employment_status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={employmentStatusOptions.map((status) => ({
+                      label: capitalize(status),
+                      value: status,
+                    }))}
+                    placeholder="Select employment status"
+                  />
+                )}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </div>
+
+      <Form.Item className={styles.submitItem}>
         <Button type="primary" htmlType="submit" loading={createEmployeeMutation.isPending}>
           Register Employee
         </Button>
