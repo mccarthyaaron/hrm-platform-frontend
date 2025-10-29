@@ -229,7 +229,7 @@ export function EmployeeRegistrationForm() {
   });
 
   return (
-    <Form layout="vertical" component="form" onSubmitCapture={onSubmit}>
+    <Form layout="vertical" component="form" onSubmitCapture={onSubmit} className={styles.form}>
       {messageContextHolder}
       {formError ? <Alert type="error" showIcon message={formError} className={styles.formAlert} /> : null}
 
@@ -280,9 +280,7 @@ export function EmployeeRegistrationForm() {
               <Controller
                 name="date_of_birth"
                 control={control}
-                render={({ field }) => (
-                  <Input {...field} value={field.value ?? ''} type="date" placeholder="YYYY-MM-DD" />
-                )}
+                render={({ field }) => <Input {...field} value={field.value ?? ''} type="date" placeholder="YYYY-MM-DD" />}
               />
             </Form.Item>
           </Col>
@@ -448,7 +446,11 @@ export function EmployeeRegistrationForm() {
 
         <Row gutter={16}>
           <Col xs={24} md={12}>
-            <Form.Item label="TIN" validateStatus={errors.tin ? 'error' : undefined} help={errors.tin?.message}>
+            <Form.Item
+              label="TIN"
+              validateStatus={errors.tin ? 'error' : undefined}
+              help={errors.tin?.message}
+            >
               <Controller
                 name="tin"
                 control={control}
@@ -474,7 +476,7 @@ export function EmployeeRegistrationForm() {
         </Row>
 
         <Row gutter={16}>
-          <Col xs={24} md={12}>
+          <Col xs={24} md={8}>
             <Form.Item
               label="Campus"
               required
@@ -500,7 +502,7 @@ export function EmployeeRegistrationForm() {
               />
             </Form.Item>
           </Col>
-          <Col xs={24} md={12}>
+          <Col xs={24} md={8}>
             <Form.Item
               label="Employee Type"
               required
@@ -526,11 +528,8 @@ export function EmployeeRegistrationForm() {
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        {employeeType === 'teaching' ? (
-          <Row gutter={16}>
-            <Col xs={24}>
+          {employeeType === 'teaching' ? (
+            <Col xs={24} md={8}>
               <Form.Item
                 label="Section"
                 required
@@ -553,8 +552,8 @@ export function EmployeeRegistrationForm() {
                 />
               </Form.Item>
             </Col>
-          </Row>
-        ) : null}
+          ) : null}
+        </Row>
 
         <Row gutter={16}>
           <Col xs={24} md={12}>
