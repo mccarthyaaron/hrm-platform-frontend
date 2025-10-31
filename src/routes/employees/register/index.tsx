@@ -7,5 +7,5 @@ export const Route = createFileRoute('/employees/register/')({
 });
 
 function RouteComponent() {
-  return <EmployeeRegistrationForm />;
+  return <EmployeeRegistrationForm mode="create" />;
 }

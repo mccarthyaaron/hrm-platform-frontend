@@ -63,21 +63,21 @@ const baseColumnList: TableColumnsType<TableRecord> = [
     key: 'phone',
   },
   {
-    title: 'Edit',
-    key: 'edit',
+    title: 'Details',
+    key: 'details',
     render: (_, record) => (
-      <Link to="/employees/register/$employeeId" params={{ employeeId: record.id }}>
-        Edit
+      <Link to="/employees/$employeeId" params={{ employeeId: record.id }}>
+        Details
       </Link>
     ),
   },
   {
-    title: 'More Details',
-    key: 'details',
-    render: (_, record) => (
-      <Link to="/employees/$employeeId" params={{ employeeId: record.id }}>
-        More details
-      </Link>
+    title: 'Actions',
+    key: 'actions',
+    render: () => (
+      <Button type="link" onClick={() => {}}>
+        Edit
+      </Button>
     ),
   },
 ];

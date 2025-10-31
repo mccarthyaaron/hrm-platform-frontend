@@ -13,6 +13,7 @@ import {
   genderOptions,
   maritalStatusOptions,
   sectionOptions,
+  type Employee,
 } from './data-schema';
 import { fetcher, HttpError } from '../../utilities/fetcher';
 import styles from './employee-registration-form.module.scss';
@@ -20,6 +21,11 @@ import dayjs from 'dayjs';
 import { postEmployee } from './heplers';
 
 const { Title } = Typography;
+
+type EmployeeRegistrationFormProps = {
+  mode: 'create' | 'edit';
+  initialValues?: Employee;
+};
 
 const employeeRegistrationFormSchema = z
   .object({
@@ -85,7 +91,7 @@ const defaultValues: EmployeeRegistrationFormValues = {
   employment_status: 'active',
 };
 
-export function EmployeeRegistrationForm() {
+export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> = ({ mode, initialValues }) => {
   const client = useQueryClient();
   const [messageApi, messageContextHolder] = message.useMessage();
   const [notificationApi, notificationContextHolder] = notification.useNotification();
@@ -109,16 +115,24 @@ export function EmployeeRegistrationForm() {
 
   const createEmployeeMutation = useMutation({
     mutationFn: async (values: any) => {
-      await postEmployee(values);
+      if (mode === 'create') {
+        await postEmployee(values);
+      } else {
+        console.log('/PUT employee details');
+      }
     },
     onSuccess: async () => {
-      reset(defaultValues);
-      messageApi.success('Employee registered successfully');
+      if (mode === 'create') {
+        reset(defaultValues);
+        messageApi.success('Employee registered successfully');
+      } else {
+        messageApi.success('Employee information updated successfully');
+      }
       await client.invalidateQueries({ queryKey: ['employees'] });
     },
     onError: (error: HttpError) => {
       notificationApi.error({
-        message: 'Employee registration failed',
+        message: mode === 'create' ? 'Employee registration failed' : 'Updating employee information failed',
         description: error.message,
         duration: 0,
       });
@@ -546,9 +560,9 @@ export function EmployeeRegistrationForm() {
           disabled={createEmployeeMutation.isPending}
           loading={createEmployeeMutation.isPending}
         >
-          Register Employee
+          {mode === 'create' ? 'Register Employee' : 'Update Employee details'}
         </Button>
       </Form.Item>
     </Form>
   );
-}
+};
