@@ -155,7 +155,7 @@ export function EmployeeList() {
         const phone = employee.telephone_number1 || employee.telephone_number2 || 'N/A';
         return {
           ...employee,
-          name: `${capitalize(employee.surname)} ${capitalize(employee.given_name)}`,
+          name: `${employee.surname} ${employee.given_name}`.toUpperCase(),
           phone,
           campusLabel: capitalize(employee.campus),
           sectionLabel: employee.section ? capitalize(employee.section) : 'N/A',
