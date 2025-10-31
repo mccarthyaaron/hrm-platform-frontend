@@ -19,6 +19,7 @@
     "@tanstack/react-router-devtools": "^1.133.27",
     "@vitejs/plugin-react": "^5.1.0",
     "antd": "^5.27.6",
+    "dayjs": "^1.11.18",
     "lodash-es": "^4.17.21",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

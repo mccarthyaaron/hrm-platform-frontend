@@ -3,6 +3,8 @@ import { type EmployeeQueryFilters } from './employee-list.component';
 import { type Employee } from './data-schema';
 import { keepPreviousData } from '@tanstack/react-query';
 import { fetcher } from '../../utilities/fetcher';
+import type { EmployeeRegistrationFormValues } from './employee-registration-form.component';
+import dayjs from 'dayjs';
 
 export function useEmployees(filters: EmployeeQueryFilters) {
   const result = useQuery({
@@ -27,4 +29,33 @@ export function useEmployees(filters: EmployeeQueryFilters) {
   }
 
   return { ...result, data: filteredEmployees };
+}
+
+export async function postEmployee(values: EmployeeRegistrationFormValues) {
+  const payload = {
+    surname: values.surname,
+    given_name: values.given_name,
+    date_of_birth: dayjs(values.date_of_birth).format('YYYY-MM-DD'),
+    gender: values.gender,
+    nationality: values.nationality,
+    nin: values.nin,
+    telephone_number1: values.telephone_number1,
+    telephone_number2: values.telephone_number2 || null,
+    email_address: values.email_address || null,
+    place_of_residence: values.place_of_residence,
+    marital_status: values.marital_status,
+    tin: values.tin || null,
+    nssf_number: values.nssf_number || null,
+    campus: values.campus,
+    employee_type: values.employee_type,
+    section: values.section || null,
+    job_title: values.job_title,
+    employment_status: values.employment_status,
+  };
+
+  const response = await fetcher<{ id: string }>('/employees', {
+    method: 'POST',
+    body: payload,
+  });
+  return response;
 }
