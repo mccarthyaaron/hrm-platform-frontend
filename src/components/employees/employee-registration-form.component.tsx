@@ -550,9 +550,25 @@ export const EmployeeRegistrationForm = ({ mode, initialValues, closeForm }: Emp
       </div>
 
       <Form.Item className={styles.submitItem}>
-        <Button type="primary" htmlType="submit" loading={createEmployeeMutation.isPending}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={createEmployeeMutation.isPending}
+          disabled={createEmployeeMutation.isPending}
+        >
           {mode === 'create' ? 'Register Employee' : 'Update Employee'}
         </Button>
+        {mode === 'edit' && (
+          <Button
+            danger
+            htmlType="button"
+            onClick={() => closeForm?.()}
+            disabled={createEmployeeMutation.isPending}
+            style={{ marginLeft: 8 }}
+          >
+            Cancel
+          </Button>
+        )}
       </Form.Item>
     </Form>
   );
