@@ -6,6 +6,14 @@ import { fetcher } from '../../utilities/fetcher';
 import type { EmployeeRegistrationFormValues } from './employee-registration-form.component';
 import dayjs from 'dayjs';
 
+export function useEmployee(id: string) {
+  const result = useQuery({
+    queryKey: ['employee', id],
+    queryFn: () => fetcher<Employee>(`/employees/${id}`),
+  });
+  return result;
+}
+
 export function useEmployees(filters: EmployeeQueryFilters) {
   const result = useQuery({
     queryKey: ['employees', filters.employment_status],

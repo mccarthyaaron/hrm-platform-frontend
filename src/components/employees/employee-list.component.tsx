@@ -19,6 +19,7 @@ import {
 } from './data-schema';
 import styles from './employee-list.module.scss';
 import { useEmployees } from './heplers';
+import EmployeeEditForm from './employee-edit-form.component';
 
 export type EmployeeQueryFilters =
   | {
@@ -33,61 +34,21 @@ export type EmployeeQueryFilters =
       section: 'All' | Section;
     };
 
-type TableRecord = Employee & {
-  name: string;
-  phone: string;
-  campusLabel: string;
-  sectionLabel: string;
-  employeeTypeLabel: string;
-};
-
-const baseColumnList: TableColumnsType<TableRecord> = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Campus',
-    dataIndex: 'campusLabel',
-    key: 'campus',
-  },
-  {
-    title: 'Employee Type',
-    dataIndex: 'employeeTypeLabel',
-    key: 'employeeType',
-  },
-  {
-    title: 'Telephone',
-    dataIndex: 'phone',
-    key: 'phone',
-  },
-  {
-    title: 'Details',
-    key: 'details',
-    render: (_, record) => (
-      <Link to="/employees/$employeeId" params={{ employeeId: record.id }}>
-        Details
-      </Link>
-    ),
-  },
-  {
-    title: 'Actions',
-    key: 'actions',
-    render: () => (
-      <Button type="link" onClick={() => {}}>
-        Edit
-      </Button>
-    ),
-  },
-];
+type TableRecord = Employee;
 
 export function EmployeeList() {
+  const [isEditDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<EmploymentStatus>(EMPLOYMENT_STATUS.ACTIVE);
   const [campusFilter, setCampusFilter] = useState<'All' | Campus>('All');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<'All' | EmployeeType>('All');
   const [sectionFilter, setSectionFilter] = useState<'All' | Section>('All');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleOpenEditDrawer = (employee: Employee) => {
+    setSelectedEmployee(employee.id);
+    setEditDrawerOpen(true);
+  };
 
   const queryFilters = useMemo<EmployeeQueryFilters>(() => {
     const baseFilters = {
@@ -102,19 +63,63 @@ export function EmployeeList() {
     else return { ...baseFilters, employee_type: employeeTypeFilter, section: sectionFilter };
   }, [statusFilter, campusFilter, employeeTypeFilter, sectionFilter]);
 
+  const baseColumns = useMemo<TableColumnsType<TableRecord>>(
+    () => [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: 'Campus',
+        dataIndex: 'campusLabel',
+        key: 'campus',
+      },
+      {
+        title: 'Employee Type',
+        dataIndex: 'employeeTypeLabel',
+        key: 'employeeType',
+      },
+      {
+        title: 'Telephone',
+        dataIndex: 'phone',
+        key: 'phone',
+      },
+      {
+        title: 'Details',
+        key: 'details',
+        render: (_, record) => (
+          <Link to="/employees/$employeeId" params={{ employeeId: record.id }}>
+            Details
+          </Link>
+        ),
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        render: (_, record) => (
+          <Button type="text" onClick={() => handleOpenEditDrawer(record)}>
+            Edit
+          </Button>
+        ),
+      },
+    ],
+    [handleOpenEditDrawer]
+  );
+
   const columns = useMemo<TableColumnsType<TableRecord>>(() => {
     if (employeeTypeFilter === EMPLOYEE_TYPE.TEACHING) {
-      const columnToInsert = {
+      const sectionColumn: TableColumnsType<TableRecord>[number] = {
         title: 'Section',
         dataIndex: 'sectionLabel',
         key: 'section',
       };
-      const indexToInsert = baseColumnList.findIndex((col) => col.key === 'employeeType') + 1;
-      return [...baseColumnList].toSpliced(indexToInsert, 0, columnToInsert);
+      const indexToInsert = baseColumns.findIndex((col) => col.key === 'employeeType') + 1;
+      return baseColumns.toSpliced(indexToInsert, 0, sectionColumn);
     }
 
-    return baseColumnList;
-  }, [employeeTypeFilter, baseColumnList]);
+    return baseColumns;
+  }, [employeeTypeFilter, baseColumns]);
 
   const { data: employees, isLoading, isFetching, isError, error } = useEmployees(queryFilters);
 
@@ -280,6 +285,9 @@ export function EmployeeList() {
         loading={isLoading || isFetching}
         className={styles.table}
       />
+      {isEditDrawerOpen && (
+        <EmployeeEditForm isOpen={isEditDrawerOpen} setIsOpen={setEditDrawerOpen} employeeId={selectedEmployee} />
+      )}
     </div>
   );
 }

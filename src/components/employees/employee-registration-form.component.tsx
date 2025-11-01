@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Col, DatePicker, Form, Input, Row, Select, Typography, message, notification } from 'antd';
+import { Button, Col, DatePicker, Form, Input, Row, Select, Typography, message, notification } from 'antd';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { capitalize } from 'lodash-es';
-
 import {
   campusOptions,
   employeeTypeOptions,
@@ -15,7 +13,7 @@ import {
   sectionOptions,
   type Employee,
 } from './data-schema';
-import { fetcher, HttpError } from '../../utilities/fetcher';
+import { HttpError } from '../../utilities/fetcher';
 import styles from './employee-registration-form.module.scss';
 import dayjs from 'dayjs';
 import { postEmployee } from './heplers';
@@ -25,6 +23,7 @@ const { Title } = Typography;
 type EmployeeRegistrationFormProps = {
   mode: 'create' | 'edit';
   initialValues?: Employee;
+  closeForm?: () => void;
 };
 
 const employeeRegistrationFormSchema = z
@@ -70,31 +69,31 @@ const employeeRegistrationFormSchema = z
 
 export type EmployeeRegistrationFormValues = z.infer<typeof employeeRegistrationFormSchema>;
 
-const defaultValues: EmployeeRegistrationFormValues = {
-  surname: '',
-  given_name: '',
-  date_of_birth: '',
-  gender: 'male',
-  nationality: 'Uganda',
-  nin: '',
-  telephone_number1: '',
-  telephone_number2: '',
-  email_address: '',
-  place_of_residence: '',
-  marital_status: 'single',
-  tin: '',
-  nssf_number: '',
-  campus: 'platinum',
-  employee_type: 'teaching',
-  section: null,
-  job_title: '',
-  employment_status: 'active',
-};
-
-export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> = ({ mode, initialValues }) => {
+export const EmployeeRegistrationForm = ({ mode, initialValues, closeForm }: EmployeeRegistrationFormProps) => {
   const client = useQueryClient();
   const [messageApi, messageContextHolder] = message.useMessage();
   const [notificationApi, notificationContextHolder] = notification.useNotification();
+
+  const initialDefaultValues = {
+    surname: initialValues?.surname ?? '',
+    given_name: initialValues?.given_name ?? '',
+    date_of_birth: initialValues?.date_of_birth ?? '',
+    gender: initialValues?.gender ?? 'male',
+    nationality: initialValues?.nationality ?? 'Uganda',
+    nin: initialValues?.nin ?? '',
+    telephone_number1: initialValues?.telephone_number1 ?? '',
+    telephone_number2: initialValues?.telephone_number2 ?? '',
+    email_address: initialValues?.email_address ?? '',
+    place_of_residence: initialValues?.place_of_residence ?? '',
+    marital_status: initialValues?.marital_status ?? 'single',
+    tin: initialValues?.tin ?? '',
+    nssf_number: initialValues?.nssf_number ?? '',
+    campus: initialValues?.campus ?? 'platinum',
+    employee_type: initialValues?.employee_type ?? 'teaching',
+    section: initialValues?.section ?? null,
+    job_title: initialValues?.job_title ?? '',
+    employment_status: initialValues?.employment_status ?? 'active',
+  };
 
   const {
     control,
@@ -102,13 +101,11 @@ export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> =
     formState: { errors },
     reset,
     watch,
-    setError,
     setValue,
-    getValues,
   } = useForm<EmployeeRegistrationFormValues>({
     mode: 'all',
     resolver: zodResolver(employeeRegistrationFormSchema),
-    defaultValues,
+    defaultValues: initialDefaultValues,
   });
 
   const formEmployeeType = watch('employee_type');
@@ -123,9 +120,10 @@ export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> =
     },
     onSuccess: async () => {
       if (mode === 'create') {
-        reset(defaultValues);
+        reset(initialDefaultValues);
         messageApi.success('Employee registered successfully');
       } else {
+        closeForm?.();
         messageApi.success('Employee information updated successfully');
       }
       await client.invalidateQueries({ queryKey: ['employees'] });
@@ -148,7 +146,7 @@ export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> =
       {notificationContextHolder}
       {messageContextHolder}
       <Title level={2} className={styles.formHeading}>
-        Register New Employee
+        {mode === 'create' && 'Register New Employee'}
       </Title>
 
       <div className={styles.section}>
@@ -554,13 +552,8 @@ export const EmployeeRegistrationForm: React.FC<EmployeeRegistrationFormProps> =
       </div>
 
       <Form.Item className={styles.submitItem}>
-        <Button
-          type="primary"
-          htmlType="submit"
-          disabled={createEmployeeMutation.isPending}
-          loading={createEmployeeMutation.isPending}
-        >
-          {mode === 'create' ? 'Register Employee' : 'Update Employee details'}
+        <Button type="primary" htmlType="submit" loading={createEmployeeMutation.isPending}>
+          {mode === 'create' ? 'Register Employee' : 'Update Employee'}
         </Button>
       </Form.Item>
     </Form>
