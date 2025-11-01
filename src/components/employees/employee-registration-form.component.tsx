@@ -1,4 +1,4 @@
-import { Button, Col, DatePicker, Form, Input, Row, Select, Typography, message, notification } from 'antd';
+import { Button, Col, DatePicker, Form, Input, Row, Select, Typography } from 'antd';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,7 @@ import { HttpError } from '../../utilities/fetcher';
 import styles from './employee-registration-form.module.scss';
 import dayjs from 'dayjs';
 import { postEmployee } from './heplers';
+import { useFeedback } from '../../context/feedback.context';
 
 const { Title } = Typography;
 
@@ -71,8 +72,7 @@ export type EmployeeRegistrationFormValues = z.infer<typeof employeeRegistration
 
 export const EmployeeRegistrationForm = ({ mode, initialValues, closeForm }: EmployeeRegistrationFormProps) => {
   const client = useQueryClient();
-  const [messageApi, messageContextHolder] = message.useMessage();
-  const [notificationApi, notificationContextHolder] = notification.useNotification();
+  const { messageApi, notificationApi } = useFeedback();
 
   const initialDefaultValues = {
     surname: initialValues?.surname ?? '',
@@ -143,8 +143,6 @@ export const EmployeeRegistrationForm = ({ mode, initialValues, closeForm }: Emp
 
   return (
     <Form layout="vertical" component="form" onSubmitCapture={onSubmit} className={styles.form}>
-      {notificationContextHolder}
-      {messageContextHolder}
       <Title level={2} className={styles.formHeading}>
         {mode === 'create' && 'Register New Employee'}
       </Title>
