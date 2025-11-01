@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 
 export function useEmployee(id: string) {
   const result = useQuery({
-    queryKey: ['employee', id],
+    queryKey: ['employees', id],
     queryFn: () => fetcher<Employee>(`/employees/${id}`),
   });
   return result;
