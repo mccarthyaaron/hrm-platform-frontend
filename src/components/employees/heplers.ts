@@ -40,6 +40,26 @@ export function useEmployees(filters: EmployeeQueryFilters) {
 }
 
 export async function postEmployee(values: EmployeeRegistrationFormValues) {
+  const payload = createPostPayload(values);
+
+  const response = await fetcher<{ id: string }>('/employees', {
+    method: 'POST',
+    body: payload,
+  });
+  return response;
+}
+
+export async function putEmployee(id: string, values: EmployeeRegistrationFormValues) {
+  const payload = createPostPayload(values);
+
+  const response = await fetcher<{ id: string }>(`/employees/${id}`, {
+    method: 'PUT',
+    body: payload,
+  });
+  return response;
+}
+
+function createPostPayload(values: EmployeeRegistrationFormValues) {
   const payload = {
     surname: values.surname,
     given_name: values.given_name,
@@ -56,14 +76,9 @@ export async function postEmployee(values: EmployeeRegistrationFormValues) {
     nssf_number: values.nssf_number || null,
     campus: values.campus,
     employee_type: values.employee_type,
-    section: values.section || null,
+    section: values.employee_type === 'teaching' ? values.section : null,
     job_title: values.job_title,
     employment_status: values.employment_status,
   };
-
-  const response = await fetcher<{ id: string }>('/employees', {
-    method: 'POST',
-    body: payload,
-  });
-  return response;
+  return payload;
 }

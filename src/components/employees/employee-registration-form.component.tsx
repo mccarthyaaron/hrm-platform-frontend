@@ -16,7 +16,7 @@ import {
 import { HttpError } from '../../utilities/fetcher';
 import styles from './employee-registration-form.module.scss';
 import dayjs from 'dayjs';
-import { postEmployee } from './heplers';
+import { postEmployee, putEmployee } from './heplers';
 import { useFeedback } from '../../context/feedback.context';
 
 const { Title } = Typography;
@@ -115,7 +115,7 @@ export const EmployeeRegistrationForm = ({ mode, initialValues, closeForm }: Emp
       if (mode === 'create') {
         await postEmployee(values);
       } else {
-        console.log('/PUT employee details');
+        await putEmployee(initialValues?.id as string, values);
       }
     },
     onSuccess: async () => {
